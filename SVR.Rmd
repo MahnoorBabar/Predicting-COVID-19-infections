@@ -1,0 +1,119 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+#Support Vector Regression
+#clean workspace 
+rm(list=ls())
+
+## Prepare scatter plot
+
+#Read data from .xls file
+data=read.csv("/Users/MahnoorKhan1/Desktop/Course Documents/2nd Semester/ECON 661/Project/Truncated time-cases-Canada.csv", header=T)
+head(data)
+
+
+#Scatter Plot
+plot(data, main ="Scatter Plot")
+
+
+## Add best-fit line to the scatter plot
+
+#Fit linear model using OLS
+model=lm(New.Cases~trend,data)
+
+#Overlay best-fit line on scatter plot
+abline(model)
+
+
+#Jumping to SVM
+## Fit SVR model and visualize using scatter plot
+
+#Install Package
+install.packages("e1071")
+
+#Load Library
+library(e1071)
+ 
+#Scatter Plot
+plot(data)
+
+#Regression with SVM
+modelsvm = svm(Y~X,data)
+
+#Predict using SVM regression
+predYsvm = predict(modelsvm, data)
+
+#Overlay SVM Predictions on Scatter Plot
+points(data$X, predYsvm, col = "red", pch=16)
+
+##Calculate parameters of the SVR model
+
+#Find value of W
+W = t(modelsvm$coefs) %*% modelsvm$SV
+
+#Find value of b
+b = modelsvm$rho
+
+## RMSE for SVR Model
+
+#Calculate RMSE 
+RMSEsvm=rmse(predYsvm,data$Y)
+
+## Tuning SVR model by varying values of maximum allowable error and cost parameter
+
+#Tune the SVM model
+OptModelsvm=tune(svm, Y~X, data=data,ranges=list(epsilon=seq(0,1,0.1), cost=1:100))
+
+#Print optimum value of parameters
+print(OptModelsvm)
+
+#Plot the perfrormance of SVM Regression model
+plot(OptModelsvm)
+
+## Select the best model out of 1100 trained models and compute RMSE
+
+#Find out the best model
+BstModel=OptModelsvm$best.model
+
+#Predict Y using best model
+PredYBst=predict(BstModel,data)
+
+#Download Library
+install.packages("Metrics")
+library(Metrics)
+
+#Calculate RMSE of the best model 
+RMSEBst=rmse(PredYBst,data$Y)
+
+##Calculate parameters of the Best SVR model
+
+#Find value of W
+W = t(BstModel$coefs) %*% BstModel$SV
+
+#Find value of b
+b = BstModel$rho
+
+## Plotting SVR Model and Tuned Model in same plot
+
+plot(data, pch=16)
+points(data$X, predYsvm, col = "blue", pch=3)
+points(data$X, PredYBst, col = "red", pch=4)
+points(data$X, predYsvm, col = "blue", pch=3, type="l")
+points(data$X, PredYBst, col = "red", pch=4, type="l")
+
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

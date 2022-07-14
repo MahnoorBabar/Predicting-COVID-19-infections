@@ -1,0 +1,85 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#clean workspace 
+rm(list=ls())
+
+#load library 
+library(EpiModel)
+
+#create function with arguments
+
+param <- param.dcm(inf.prob = 0.5, act.rate = 0.6)
+init <- init.dcm(s.num = 38067913, i.num = 7053) 
+control <- control.dcm(type = "SI", nsteps = 100)
+
+mod <- dcm(param, init, control)
+
+mod
+
+plot(mod)
+
+summary(mod, at = 10)
+
+head(as.data.frame(mod, out = "mean")) 
+
+
+#stochastic model
+param <- param.icm(inf.prob = 0.2, act.rate = 0.25)
+init <- init.icm(s.num = 38067913, i.num = 3436460)
+control <- control.icm(type = "SI", nsims = 10, nsteps = 300)
+mod <- icm(param, init, control)
+
+#clean workspace 
+rm(list=ls())
+
+#SIS
+param <- param.dcm(inf.prob = 0.3, act.rate = seq(0.4, 0.6, 0.8), rec.rate = 0.02)
+init <- init.dcm(s.num = 38067913, i.num = 7053)
+control <- control.dcm(type = "SIS", nsteps = 100)
+mod <- dcm(param, init, control)
+
+rm(list=ls())
+param <- param.dcm(inf.prob = 0.3, act.rate = seq(0.3, 0.9, 0.1), rec.rate = 0.02)
+init <- init.dcm(s.num = 38067913, i.num = 7053)
+control <- control.dcm(type = "SIS", nsteps = 100)
+mod <- dcm(param, init, control)
+
+mod
+
+#extract values
+head(as.data.frame(mod, run = 5))
+
+#plot
+par(mfrow = c(1,2), mar = c(3.2,3,2.5,1))
+plot(mod, alpha = 1, main = "Infection Prevalence")
+plot(mod, y = "si.flow", col = "Blues", alpha = 0.7, main = "Infection Incidence")
+
+#vary both
+act.rates <- c(0.2, 0.2, 0.4, 0.4, 0.6, 0.6)
+inf.probs <- c(0.1, 0.2, 0.1, 0.2, 0.1, 0.2)
+param <- param.dcm(inf.prob = inf.probs, act.rate = act.rates,
+                   rec.rate = 0.02)
+mod <- dcm(param, init, control)
+plot(mod)
+
+#numbers
+summary(mod, at = 6, run = 5)
+
+
+#Support Vector Regression
+#clean workspace 
+rm(list=ls())
+
+## Prepare scatter plot
+
+#Read data from .xls file
+data=read.csv("/Users/MahnoorKhan1/Desktop/Course Documents/2nd Semester/ECON 661/Project/owid-covid-data.csv", header=T)
+head(data)
+
+data=read.csv("owid-covid-data.csv", header=T)
+
+#Scatter Plot
+plot(data, main ="Scatter Plot")
